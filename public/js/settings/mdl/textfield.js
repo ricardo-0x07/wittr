@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-'use strict';
+'use strict'
 
 /**
  * Class constructor for Textfield MDL component.
@@ -26,10 +26,10 @@
  * @param {HTMLElement} element The element that will be upgraded.
  */
 export default function MaterialTextfield(element) {
-  this.element_ = element;
-  this.maxRows = this.Constant_.NO_MAX_ROWS;
+  this.element_ = element
+  this.maxRows = this.Constant_.NO_MAX_ROWS
   // Initialize instance.
-  this.init();
+  this.init()
 }
 
 /**
@@ -41,7 +41,7 @@ export default function MaterialTextfield(element) {
 MaterialTextfield.prototype.Constant_ = {
   NO_MAX_ROWS: -1,
   MAX_ROWS_ATTRIBUTE: 'maxrows'
-};
+}
 
 /**
  * Store strings for class names defined by this component that are used in
@@ -59,7 +59,7 @@ MaterialTextfield.prototype.CssClasses_ = {
   IS_DISABLED: 'is-disabled',
   IS_INVALID: 'is-invalid',
   IS_UPGRADED: 'is-upgraded'
-};
+}
 
 /**
  * Handle input being entered.
@@ -68,13 +68,13 @@ MaterialTextfield.prototype.CssClasses_ = {
  * @private
  */
 MaterialTextfield.prototype.onKeyDown_ = function(event) {
-  var currentRowCount = event.target.value.split('\n').length;
+  var currentRowCount = event.target.value.split('\n').length
   if (event.keyCode === 13) {
     if (currentRowCount >= this.maxRows) {
-      event.preventDefault();
+      event.preventDefault()
     }
   }
-};
+}
 
 /**
  * Handle focus.
@@ -83,8 +83,8 @@ MaterialTextfield.prototype.onKeyDown_ = function(event) {
  * @private
  */
 MaterialTextfield.prototype.onFocus_ = function(event) {
-  this.element_.classList.add(this.CssClasses_.IS_FOCUSED);
-};
+  this.element_.classList.add(this.CssClasses_.IS_FOCUSED)
+}
 
 /**
  * Handle lost focus.
@@ -93,8 +93,8 @@ MaterialTextfield.prototype.onFocus_ = function(event) {
  * @private
  */
 MaterialTextfield.prototype.onBlur_ = function(event) {
-  this.element_.classList.remove(this.CssClasses_.IS_FOCUSED);
-};
+  this.element_.classList.remove(this.CssClasses_.IS_FOCUSED)
+}
 
 /**
  * Handle reset event from out side.
@@ -103,8 +103,8 @@ MaterialTextfield.prototype.onBlur_ = function(event) {
  * @private
  */
 MaterialTextfield.prototype.onReset_ = function(event) {
-  this.updateClasses_();
-};
+  this.updateClasses_()
+}
 
 /**
  * Handle class updates.
@@ -112,10 +112,10 @@ MaterialTextfield.prototype.onReset_ = function(event) {
  * @private
  */
 MaterialTextfield.prototype.updateClasses_ = function() {
-  this.checkDisabled();
-  this.checkValidity();
-  this.checkDirty();
-};
+  this.checkDisabled()
+  this.checkValidity()
+  this.checkDirty()
+}
 
 // Public methods.
 
@@ -126,13 +126,13 @@ MaterialTextfield.prototype.updateClasses_ = function() {
  */
 MaterialTextfield.prototype.checkDisabled = function() {
   if (this.input_.disabled) {
-    this.element_.classList.add(this.CssClasses_.IS_DISABLED);
+    this.element_.classList.add(this.CssClasses_.IS_DISABLED)
   } else {
-    this.element_.classList.remove(this.CssClasses_.IS_DISABLED);
+    this.element_.classList.remove(this.CssClasses_.IS_DISABLED)
   }
-};
+}
 MaterialTextfield.prototype['checkDisabled'] =
-    MaterialTextfield.prototype.checkDisabled;
+    MaterialTextfield.prototype.checkDisabled
 
 /**
  * Check the validity state and update field accordingly.
@@ -142,14 +142,14 @@ MaterialTextfield.prototype['checkDisabled'] =
 MaterialTextfield.prototype.checkValidity = function() {
   if (this.input_.validity) {
     if (this.input_.validity.valid) {
-      this.element_.classList.remove(this.CssClasses_.IS_INVALID);
+      this.element_.classList.remove(this.CssClasses_.IS_INVALID)
     } else {
-      this.element_.classList.add(this.CssClasses_.IS_INVALID);
+      this.element_.classList.add(this.CssClasses_.IS_INVALID)
     }
   }
-};
+}
 MaterialTextfield.prototype['checkValidity'] =
-    MaterialTextfield.prototype.checkValidity;
+    MaterialTextfield.prototype.checkValidity
 
 /**
  * Check the dirty state and update field accordingly.
@@ -158,13 +158,13 @@ MaterialTextfield.prototype['checkValidity'] =
  */
 MaterialTextfield.prototype.checkDirty = function() {
   if (this.input_.value && this.input_.value.length > 0) {
-    this.element_.classList.add(this.CssClasses_.IS_DIRTY);
+    this.element_.classList.add(this.CssClasses_.IS_DIRTY)
   } else {
-    this.element_.classList.remove(this.CssClasses_.IS_DIRTY);
+    this.element_.classList.remove(this.CssClasses_.IS_DIRTY)
   }
-};
+}
 MaterialTextfield.prototype['checkDirty'] =
-    MaterialTextfield.prototype.checkDirty;
+    MaterialTextfield.prototype.checkDirty
 
 /**
  * Disable text field.
@@ -172,10 +172,10 @@ MaterialTextfield.prototype['checkDirty'] =
  * @public
  */
 MaterialTextfield.prototype.disable = function() {
-  this.input_.disabled = true;
-  this.updateClasses_();
-};
-MaterialTextfield.prototype['disable'] = MaterialTextfield.prototype.disable;
+  this.input_.disabled = true
+  this.updateClasses_()
+}
+MaterialTextfield.prototype['disable'] = MaterialTextfield.prototype.disable
 
 /**
  * Enable text field.
@@ -183,10 +183,10 @@ MaterialTextfield.prototype['disable'] = MaterialTextfield.prototype.disable;
  * @public
  */
 MaterialTextfield.prototype.enable = function() {
-  this.input_.disabled = false;
-  this.updateClasses_();
-};
-MaterialTextfield.prototype['enable'] = MaterialTextfield.prototype.enable;
+  this.input_.disabled = false
+  this.updateClasses_()
+}
+MaterialTextfield.prototype['enable'] = MaterialTextfield.prototype.enable
 
 /**
  * Update text field value.
@@ -197,13 +197,13 @@ MaterialTextfield.prototype['enable'] = MaterialTextfield.prototype.enable;
 MaterialTextfield.prototype.change = function(value) {
 
   if (value) {
-    this.input_.value = value;
+    this.input_.value = value
   } else {
-    this.input_.value = '';
+    this.input_.value = ''
   }
-  this.updateClasses_();
-};
-MaterialTextfield.prototype['change'] = MaterialTextfield.prototype.change;
+  this.updateClasses_()
+}
+MaterialTextfield.prototype['change'] = MaterialTextfield.prototype.change
 
 /**
  * Initialize element.
@@ -211,40 +211,40 @@ MaterialTextfield.prototype['change'] = MaterialTextfield.prototype.change;
 MaterialTextfield.prototype.init = function() {
 
   if (this.element_) {
-    this.label_ = this.element_.querySelector('.' + this.CssClasses_.LABEL);
-    this.input_ = this.element_.querySelector('.' + this.CssClasses_.INPUT);
+    this.label_ = this.element_.querySelector('.' + this.CssClasses_.LABEL)
+    this.input_ = this.element_.querySelector('.' + this.CssClasses_.INPUT)
 
     if (this.input_) {
       if (this.input_.hasAttribute(
             /** @type {string} */ (this.Constant_.MAX_ROWS_ATTRIBUTE))) {
         this.maxRows = parseInt(this.input_.getAttribute(
-            /** @type {string} */ (this.Constant_.MAX_ROWS_ATTRIBUTE)), 10);
+            /** @type {string} */ (this.Constant_.MAX_ROWS_ATTRIBUTE)), 10)
         if (isNaN(this.maxRows)) {
-          this.maxRows = this.Constant_.NO_MAX_ROWS;
+          this.maxRows = this.Constant_.NO_MAX_ROWS
         }
       }
 
-      this.boundUpdateClassesHandler = this.updateClasses_.bind(this);
-      this.boundFocusHandler = this.onFocus_.bind(this);
-      this.boundBlurHandler = this.onBlur_.bind(this);
-      this.boundResetHandler = this.onReset_.bind(this);
-      this.input_.addEventListener('input', this.boundUpdateClassesHandler);
-      this.input_.addEventListener('focus', this.boundFocusHandler);
-      this.input_.addEventListener('blur', this.boundBlurHandler);
-      this.input_.addEventListener('reset', this.boundResetHandler);
+      this.boundUpdateClassesHandler = this.updateClasses_.bind(this)
+      this.boundFocusHandler = this.onFocus_.bind(this)
+      this.boundBlurHandler = this.onBlur_.bind(this)
+      this.boundResetHandler = this.onReset_.bind(this)
+      this.input_.addEventListener('input', this.boundUpdateClassesHandler)
+      this.input_.addEventListener('focus', this.boundFocusHandler)
+      this.input_.addEventListener('blur', this.boundBlurHandler)
+      this.input_.addEventListener('reset', this.boundResetHandler)
 
       if (this.maxRows !== this.Constant_.NO_MAX_ROWS) {
         // TODO: This should handle pasting multi line text.
         // Currently doesn't.
-        this.boundKeyDownHandler = this.onKeyDown_.bind(this);
-        this.input_.addEventListener('keydown', this.boundKeyDownHandler);
+        this.boundKeyDownHandler = this.onKeyDown_.bind(this)
+        this.input_.addEventListener('keydown', this.boundKeyDownHandler)
       }
 
-      this.updateClasses_();
-      this.element_.classList.add(this.CssClasses_.IS_UPGRADED);
+      this.updateClasses_()
+      this.element_.classList.add(this.CssClasses_.IS_UPGRADED)
     }
   }
-};
+}
 
 /**
  * Downgrade the component
@@ -252,11 +252,11 @@ MaterialTextfield.prototype.init = function() {
  * @private
  */
 MaterialTextfield.prototype.mdlDowngrade_ = function() {
-  this.input_.removeEventListener('input', this.boundUpdateClassesHandler);
-  this.input_.removeEventListener('focus', this.boundFocusHandler);
-  this.input_.removeEventListener('blur', this.boundBlurHandler);
-  this.input_.removeEventListener('reset', this.boundResetHandler);
+  this.input_.removeEventListener('input', this.boundUpdateClassesHandler)
+  this.input_.removeEventListener('focus', this.boundFocusHandler)
+  this.input_.removeEventListener('blur', this.boundBlurHandler)
+  this.input_.removeEventListener('reset', this.boundResetHandler)
   if (this.boundKeyDownHandler) {
-    this.input_.removeEventListener('keydown', this.boundKeyDownHandler);
+    this.input_.removeEventListener('keydown', this.boundKeyDownHandler)
   }
-};
+}
