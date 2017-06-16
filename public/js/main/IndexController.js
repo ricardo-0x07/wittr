@@ -18,7 +18,7 @@ IndexController.prototype._registerServiceWorker = function() {
       .then(sw => console.dir(sw))
       .catch(err => console.error(err))
   } else {
-    console.error('Service Worker registration failed')
+    console.error('Unsuccessful Service Worker Registration')
   }
 }
 
