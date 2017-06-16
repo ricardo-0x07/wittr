@@ -11,24 +11,62 @@ export default function IndexController(container) {
   this._registerServiceWorker()
 }
 
-// registering service workers
 IndexController.prototype._registerServiceWorker = function() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then(sw => {
-        console.log('Successful Service Worker Registration')
-        console.log(sw)
+  const indexController = this
 
-        sw.onupdatefound = function(event) {
-          console.log('update found!')
-          console.log(event)
-        }
-
-      })
-      .catch(err => console.error(err))
-  } else {
-    console.error('Unsuccessful Service Worker Registration')
+  if (!navigator.serviceWorker) {
+    console.error('Service Workers are not supported on this browser.')
+    return
   }
+
+  navigator.serviceWorker.register('/sw.js')
+  .then(function(reg) {
+    self.__SW_REGISTRATION__ = reg
+
+    // NOTE/FSO: no controller means page wasn't loaded via a SW
+    // (so users are looking the latest version)
+    if (!navigator.serviceWorker.controller) return
+
+    // updated worker already waiting
+    if (reg.waiting) {
+      indexController._updateReady()
+      return
+    }
+
+    // NOTE: if there's an updated worker installing, track its
+    // progress. If it becomes "installed", call
+    // indexController._updateReady()
+    if (reg.installing) {
+      indexController._trackInstalling(reg.installing)
+      return
+    }
+
+    // [...] otherwise, listen for new installing workers arriving, and
+    // track their progress
+    reg.addEventListener('updatefound', () => {
+      indexController._trackInstalling(reg.installing)
+    })
+  })
+}
+
+/**
+ * Keep track of a Service Worker that's being installed, and
+ * notify the user when the installation has successfully finished.
+ */
+IndexController.prototype._trackInstalling = function(worker) {
+  const indexController = this
+
+  worker.addEventListener('statechange', () => {
+    if (worker.state === 'installed') {
+      indexController._updateReady()
+    }
+  })
+}
+
+IndexController.prototype._updateReady = function() {
+  const toast = this._toastsView.show("New version available", {
+    buttons: ['whatever']
+  })
 }
 
 // open a connection to the server for live updates
