@@ -21,7 +21,7 @@ IndexController.prototype._registerServiceWorker = function() {
 
   navigator.serviceWorker.register('/sw.js')
     .then(function(reg) {
-      self.__SW_REGISTRATION__ = reg // debugging only
+      self.__SW_REGISTRATION__ = reg // DEBUG ONLY
 
       // NOTE/FSO: no controller means page wasn't loaded via a SW
       // (so users are looking the latest version)

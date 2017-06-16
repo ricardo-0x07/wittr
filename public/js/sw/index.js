@@ -1,8 +1,10 @@
-const STATIC_CACHE_NAME = 'wittr-static-v4'
+// @flow
+
+const STATIC_CACHE_NAME = 'wittr-static-v4.1'
 
 self.addEventListener('install', function(event) {
   const urlsToCache = [
-    '/',
+    '/skeleton',    // caching skeleton (app "shell") instead of root page
     '/js/main.js',
     'css/main.css',
     'imgs/icon.png',
@@ -37,8 +39,21 @@ self.addEventListener('activate', function(event) {
   )
 })
 
-self.addEventListener('fetch', function(event) {
-  self.__EVENT__CURRENT_FETCH__ = event // for debugging purposes only
+self.addEventListener('fetch', function(event: FetchEvent) {
+  self.__EVENT__CURRENT_FETCH__ = event // DEBUG ONLY
+
+  // requests for root page get /skeleton response (from cache)
+  const requestUrl = new URL(event.request.url)
+
+  if (requestUrl.origin === location.origin) {
+    if (requestUrl.pathname === '/') {
+      event.respondWith(caches.match('/skeleton'))
+
+      // `skeleton` is cached at install time, so we don't need fallback
+      return
+    }
+  }
+
   event.respondWith(caches.match(event.request)
     .then(response => response || fetch(event.request)))
 })
