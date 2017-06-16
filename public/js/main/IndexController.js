@@ -29,7 +29,7 @@ IndexController.prototype._registerServiceWorker = function() {
 
       // updated worker already waiting
       if (reg.waiting) {
-        indexController._updateReady()
+        indexController._updateReady(reg.waiting)
         return
       }
 
@@ -43,11 +43,16 @@ IndexController.prototype._registerServiceWorker = function() {
 
       // [...] otherwise, listen for new installing workers arriving, and
       // track their progress
-      reg.addEventListener('updatefound', () => { indexController._trackInstalling(reg.installing) })
+      reg.addEventListener('updatefound', () => {
+        indexController._trackInstalling(reg.installing)
+      })
     })
 
-  // TODO: listen for the controlling service worker changing
-  // and reload the page
+  // listen for controlling SW changing & and reload the page
+  navigator.serviceWorker.addEventListener('controllerchange', (event) => {
+    console.log('[sw#controllerchange]', event)
+    window.location.reload()
+  })
 }
 
 // Keep track of a Service Worker that's being installed, and
@@ -62,7 +67,7 @@ IndexController.prototype._trackInstalling = function(worker) {
   })
 }
 
-IndexController.prototype._updateReady = function(updateMessage) {
+IndexController.prototype._updateReady = function(worker, updateMessage) {
   const msg = updateMessage || 'New Version Available'
   const toast = this._toastsView.show(msg, {
     buttons: ['refresh', 'dismiss']
@@ -70,8 +75,7 @@ IndexController.prototype._updateReady = function(updateMessage) {
 
   toast.answer.then(function(answer) {
     if (answer != 'refresh') return
-
-    // TODO: tell SW to skipWaiting
+    worker.postMessage({ action: 'skipWaiting' }) // tell SW to `skipWaiting`
   })
 }
 
