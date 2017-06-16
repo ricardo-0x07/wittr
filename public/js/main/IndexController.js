@@ -15,7 +15,16 @@ export default function IndexController(container) {
 IndexController.prototype._registerServiceWorker = function() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
-      .then(sw => console.dir(sw))
+      .then(sw => {
+        console.log('Successful Service Worker Registration')
+        console.log(sw)
+
+        sw.onupdatefound = function(event) {
+          console.log('update found!')
+          console.log(event)
+        }
+
+      })
       .catch(err => console.error(err))
   } else {
     console.error('Unsuccessful Service Worker Registration')
