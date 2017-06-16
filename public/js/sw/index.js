@@ -1,3 +1,5 @@
+const STATIC_CACHE_NAME = 'wittr-static-v2'
+
 self.addEventListener('install', function(event) {
   const urlsToCache = [
     '/',
@@ -9,22 +11,30 @@ self.addEventListener('install', function(event) {
   ]
 
   event.waitUntil(
-    // NOTE: save urls to 'wittr-static-v1' cache
-    caches.open('wittr-static-v2').then(function(cache) {
-      console.groupCollapsed(`SW setup -- caching ${urlsToCache.length} objects`)
-      console.info('Successful SW Installation')
-      console.info('URLs to cache: ', urlsToCache)
-      console.groupEnd()
+    caches.open(STATIC_CACHE_NAME)
+      .then(function(cache) {
+        console.groupCollapsed(`SW setup -- caching ${urlsToCache.length} objects`)
+        console.info('Successful SW Installation')
+        console.info('URLs to cache: ', urlsToCache)
+        console.groupEnd()
 
-      return cache.addAll(urlsToCache)
-    })
+        return cache.addAll(urlsToCache)
+      })
   )
 })
 
 self.addEventListener('activate', function(event) {
   event.waitUntil(
-    // remove old cache
-    caches.delete('wittr-static-v1')
+    // NOTE: Only remove caches beginning with 'wittr-', and don't disturb
+    // caches which other parts of the app may depend on.
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.filter(cacheName => {
+          return cacheName.startsWith('wittr-') &&
+                 cacheName != STATIC_CACHE_NAME
+        }).map(cacheName => cache.delete(cacheName))
+      )
+    })
   )
 })
 
