@@ -1,31 +1,32 @@
 import idb from 'idb'
 
-var dbPromise = idb.open('test-db', 1, function(upgradeDb) {
-  var keyValStore = upgradeDb.createObjectStore('keyval')
-  keyValStore.put("world", "hello")
+const DB = idb.open('test-db', 1, function(upgradeDb) {
+  const kvStore = upgradeDb.createObjectStore('keyval')
+  kvStore.put('world', 'hello')
 })
 
-// read "hello" in "keyval"
-dbPromise.then(function(db) {
-  var tx = db.transaction('keyval')
-  var keyValStore = tx.objectStore('keyval')
-  return keyValStore.get('hello')
+// Reading from the DB
+DB.then(db => {
+  const tx = db.transaction('keyval')
+  const kvStore = tx.objectStore('keyval')
+  return kvStore.get('hello')
 }).then(function(val) {
-  console.log('The value of "hello" is:', val)
+  console.log(`store['hello'] -> ${val}`)
 })
 
-// set "foo" to be "bar" in "keyval"
-dbPromise.then(function(db) {
-  var tx = db.transaction('keyval', 'readwrite')
-  var keyValStore = tx.objectStore('keyval')
-  keyValStore.put('bar', 'foo')
+// Writing to the DB
+DB.then(db => {
+  const tx = db.transaction('keyval', 'readwrite')
+  const kvStore = tx.objectStore('keyval')
+  kvStore.put('bar', 'foo')
   return tx.complete
 }).then(function() {
-  console.log('Added foo:bar to keyval')
+  console.log("Added foo:bar to 'keyval' store")
 })
 
-dbPromise.then(function(db) {
-  // TODO: in the keyval store, set
-  // "favoriteAnimal" to your favourite animal
-  // eg "cat" or "dog"
-})
+// Save favorite animal
+DB.then(db => {
+  const tx = db.transaction('keyval', 'readwrite')
+  const store = tx.objectStore('keyval')
+  store.put('donkey', 'favoriteAnimal')
+}).then(() => console.log("Added favoriteAnimal:donkey to 'keyval' store"))
