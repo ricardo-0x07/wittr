@@ -1,4 +1,4 @@
-const STATIC_CACHE_NAME = 'wittr-static-v2'
+const STATIC_CACHE_NAME = 'wittr-static-v4'
 
 self.addEventListener('install', function(event) {
   const urlsToCache = [
@@ -14,10 +14,9 @@ self.addEventListener('install', function(event) {
     caches.open(STATIC_CACHE_NAME)
       .then(function(cache) {
         console.groupCollapsed(`SW setup -- caching ${urlsToCache.length} objects`)
-        console.info('Successful SW Installation')
-        console.info('URLs to cache: ', urlsToCache)
+          console.info('Successful SW Installation')
+          console.info('URLs to cache: ', urlsToCache)
         console.groupEnd()
-
         return cache.addAll(urlsToCache)
       })
   )
@@ -32,17 +31,20 @@ self.addEventListener('activate', function(event) {
         cacheNames.filter(cacheName => {
           return cacheName.startsWith('wittr-') &&
                  cacheName != STATIC_CACHE_NAME
-        }).map(cacheName => cache.delete(cacheName))
+        }).map(cacheName => caches.delete(cacheName))
       )
     })
   )
 })
 
 self.addEventListener('fetch', function(event) {
-  self.__CURRENT_FETCH__ = event // for debugging purposes only
+  self.__EVENT__CURRENT_FETCH__ = event // for debugging purposes only
+  event.respondWith(caches.match(event.request)
+    .then(response => response || fetch(event.request)))
+})
 
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
-  )
+// `skipWaiting` if we get the right kind of message from the UI
+self.addEventListener('message', function(event) {
+  console.log('[ui] -> [sw]', event)
+  if (event.data.action == 'skipWaiting') self.skipWaiting()
 })
