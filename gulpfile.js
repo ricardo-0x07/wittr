@@ -49,7 +49,9 @@ function createBundle(src) {
   var b = watchify(browserify(opts))
 
   b.transform(babelify.configure({
-    stage: 1
+    presets: ["env", "stage-0", "flow"],
+    retainLines: true,
+    sourceMaps: true,
   }))
 
   b.transform(hbsfy)

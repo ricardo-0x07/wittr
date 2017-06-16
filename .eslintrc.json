@@ -11,7 +11,13 @@
    "es6": true,
    "node": true
  },
- "extends": "eslint:recommended",
+ "extends": [
+   "eslint:recommended",
+   "plugin:flowtype/recommended"
+ ],
+ "plugins": [
+   "flowtype"
+ ],
  "rules": {
    "no-console": [0],
    "no-unused-vars":"warn",
