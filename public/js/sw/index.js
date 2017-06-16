@@ -40,7 +40,9 @@ self.addEventListener('activate', function(event) {
 
 self.addEventListener('fetch', function(event) {
   self.__EVENT__CURRENT_FETCH__ = event // for debugging purposes only
-
   event.respondWith(caches.match(event.request)
-                      .then(response => response || fetch(event.request)))
+    .then(response => response || fetch(event.request)))
 })
+
+// TODO: listen for the 'message' event, and call
+// `skipWaiting` if you get the appropriate message
