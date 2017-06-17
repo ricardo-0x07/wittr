@@ -30,8 +30,6 @@ export default function IndexController(container: HTMLElement) {
   this._postsView = new PostsView(this._container)
   this._toastsView = new ToastsView(this._container)
   this._lostConnectionToast = null
-  // this._openSocket() -- firing up ws connection here causes messages to be shown
-  //                       twice in the UI
   this._dbPromise = openDatabase()
   this._registerServiceWorker()
 
