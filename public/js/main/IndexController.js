@@ -1,4 +1,4 @@
-// @flow weak
+// @flow
 
 import idb from 'idb'
 import invariant from 'invariant'
@@ -7,7 +7,8 @@ import ToastsView from './views/Toasts'
 
 const NO_SW_MESSAGE = 'Service Workers are not supported on this browser!'
 
-function openDatabase() {
+// type t_db = Promise<void> | Promise<IDBDatabase>
+function openDatabase(): * {
   // If the browser doesn't support service worker,
   // we don't care about having a database
   if (!navigator.serviceWorker) {
@@ -159,10 +160,13 @@ IndexController.prototype._openSocket = function() {
 IndexController.prototype._onSocketMessage = function(data) {
   const messages = JSON.parse(data)
 
+  // populate 'wittrs' store
   this._dbPromise.then(function(db) {
     if (!db) return
 
-    // TODO: put each message into 'wittrs' object store
+    const tx = db.transaction('wittrs', 'readwrite')
+    const store = tx.objectStore('wittrs')
+    messages.forEach(message => { store.put(message) })
   })
 
   this._postsView.addPosts(messages)
