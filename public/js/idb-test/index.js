@@ -29,4 +29,5 @@ DB.then(db => {
   const tx = db.transaction('keyval', 'readwrite')
   const store = tx.objectStore('keyval')
   store.put('donkey', 'favoriteAnimal')
+  return tx.complete
 }).then(() => console.log("Added favoriteAnimal:donkey to 'keyval' store"))
