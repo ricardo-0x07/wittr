@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "cross-env NODE_ENV=development eslint . --cache",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "gulp serve"
+    "serve": "cross-env NODE_ENV=development gulp serve"
   },
   "author": "",
   "license": "ISC",
@@ -23,6 +23,7 @@
     "compression": "^1.5.2",
     "cross-env": "^5.0.1",
     "del": "^1.2.1",
+    "envify": "^4.0.0",
     "es6-promise": "^3.0.2",
     "eslint": "^4.0.0",
     "eslint-plugin-flowtype": "^2.34.0",
@@ -42,6 +43,7 @@
     "hbsfy": "^2.2.1",
     "hbsify": "^1.0.1",
     "idb": "^1.0.1",
+    "invariant": "^2.2.2",
     "lodash": "^3.10.1",
     "markov": "0.0.7",
     "merge-stream": "^1.0.0",
