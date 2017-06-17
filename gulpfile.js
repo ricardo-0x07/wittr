@@ -6,6 +6,7 @@ var assign = require('lodash/object/assign')
 var browserify = require('browserify')
 var watchify = require('watchify')
 var babelify = require('babelify')
+var envify = require('envify')
 var hbsfy = require('hbsfy')
 var source = require('vinyl-source-stream')
 var buffer = require('vinyl-buffer')
@@ -53,6 +54,9 @@ function createBundle(src) {
     retainLines: true,
     sourceMaps: true,
   }))
+
+  // inject process.env vars
+  b.transform(envify)
 
   b.transform(hbsfy)
   b.on('log', plugins.util.log)
