@@ -74,3 +74,20 @@ DB.then(db => {
 
   return ageIdx.getAll()
 }).then(people => console.log('People by age:', people))
+
+// Iterating through a store, using cursor
+DB.then(db => {
+  const tx = db.transaction('people')
+  const store = tx.objectStore('people')
+  const ageIndex = store.index('age')
+
+  return ageIndex.openCursor()
+}).then(function logPerson(cursor) {
+  if (!cursor) return
+  console.log(`Cursored at: ${cursor.value.name}`)
+  // cursor.update(newValue)
+  // cursor.delete()
+  return cursor.continue().then(logPerson)
+}).then(() => {
+  console.log('Done cursoring')
+})
