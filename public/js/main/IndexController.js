@@ -2,11 +2,10 @@
 
 import idb from 'idb'
 import invariant from 'invariant'
-
 import PostsView from './views/Posts'
 import ToastsView from './views/Toasts'
 
-const NO_SW_MESSAGE = 'Service Workers are not supported on this browser!'
+import {NO_SW_MESSAGE, MAX_WITTRS} from './config'
 
 // type t_db = Promise<void> | Promise<IDBDatabase>
 function openDatabase(): * {
@@ -202,11 +201,17 @@ IndexController.prototype._onSocketMessage = function(data) {
     const store = tx.objectStore('wittrs')
     messages.forEach(message => { store.put(message) })
 
-    // TODO: keep the newest 30 entries in 'wittrs',
+    // TODO: keep the newest `MAX_WITTRS` entries in 'wittrs' store,
     // but delete the rest.
-    //
     // Hint: you can use .openCursor(null, 'prev') to open a
     // cursor that goes through an index/store backwards.
+    store.index('by-date').openCursor(null, 'prev')
+      .then(cursor => cursor.advance(MAX_WITTRS))
+      .then(function deleteRest(cursor) {
+        if (!cursor) return
+        cursor.delete()
+        return cursor.continue().then(deleteRest)
+      })
   })
 
   this._postsView.addPosts(messages)
