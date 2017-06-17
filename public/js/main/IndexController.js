@@ -2,6 +2,7 @@
 
 import idb from 'idb'
 import invariant from 'invariant'
+
 import PostsView from './views/Posts'
 import ToastsView from './views/Toasts'
 
@@ -23,25 +24,30 @@ function openDatabase(): * {
   })
 }
 
+
 export default function IndexController(container: HTMLElement) {
   invariant(container, "The `container` provided is not an HTML Element!")
-
   this._container = container
   this._postsView = new PostsView(this._container)
   this._toastsView = new ToastsView(this._container)
   this._lostConnectionToast = null
   this._openSocket()
   this._dbPromise = openDatabase()
+  this._registerServiceWorker()
 
-  if ('serviceWorker' in navigator) {
-    this._registerServiceWorker()
-  } else {
-    console.warn(NO_SW_MESSAGE)
-  }
+  const indexController = this
+
+  this._showCachedMessages().then(() => {
+    indexController._openSocket()
+  })
 }
 
+
 IndexController.prototype._registerServiceWorker = function() {
-  if (!navigator.serviceWorker) return
+  if (!navigator.serviceWorker) {
+    console.warn(NO_SW_MESSAGE)
+    return
+  }
 
   const indexController = this
 
@@ -88,6 +94,26 @@ IndexController.prototype._registerServiceWorker = function() {
   })
 }
 
+
+IndexController.prototype._showCachedMessages = function() {
+  const indexController = this
+
+  return this._dbPromise.then(function(db) {
+    // if we're already showing posts, eg shift-refresh
+    // or the very first load, there's no point fetching
+    // posts from IDB
+    if (!db || indexController._postsView.showingPosts()) return
+
+    // TODO: get all of the wittr message objects from indexeddb,
+    // then pass them to:
+    // indexController._postsView.addPosts(messages)
+    // in order of date, starting with the latest.
+    // Remember to return a promise that does all this,
+    // so the websocket isn't opened until you're done!
+  })
+}
+
+
 // Keep track of a Service Worker that's being installed, and
 // notify the user when the installation has successfully finished.
 IndexController.prototype._trackInstalling = function(worker: ServiceWorker) {
@@ -98,6 +124,7 @@ IndexController.prototype._trackInstalling = function(worker: ServiceWorker) {
     }
   })
 }
+
 
 IndexController.prototype._updateReady = function(worker: ServiceWorker, updateMessage?: string) {
   const msg = updateMessage || 'New Version Available'
@@ -110,6 +137,7 @@ IndexController.prototype._updateReady = function(worker: ServiceWorker, updateM
     worker.postMessage({ action: 'skipWaiting' }) // tell SW to `skipWaiting`
   })
 }
+
 
 // open a connection to the server for live updates
 IndexController.prototype._openSocket = function() {
@@ -139,6 +167,7 @@ IndexController.prototype._openSocket = function() {
 
   ws.addEventListener('message', function(event) {
     requestAnimationFrame(function() {
+      // $FlowFixMe
       indexController._onSocketMessage(event.data)
     })
   })
@@ -155,6 +184,7 @@ IndexController.prototype._openSocket = function() {
     }, 5000)
   })
 }
+
 
 // called when the web socket sends message data
 IndexController.prototype._onSocketMessage = function(data) {

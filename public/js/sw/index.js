@@ -1,6 +1,6 @@
 // @flow
 
-const STATIC_CACHE_NAME = 'wittr-static-v4.1'
+const STATIC_CACHE_NAME = 'wittr-static-v4'
 
 self.addEventListener('install', function(event) {
   const urlsToCache = [
