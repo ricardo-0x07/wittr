@@ -53,3 +53,12 @@ DB.then(db => {
 
   return tx.complete
 }).then(() => console.log('People added'))
+
+// List all cat people
+DB.then(db => {
+  const tx = db.transaction('people')
+  const store = tx.objectStore('people')
+  const animalIdx = store.index('animal')
+
+  return animalIdx.getAll('cat')
+}).then(people => console.log('Cat people:', people))
