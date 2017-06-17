@@ -201,6 +201,12 @@ IndexController.prototype._onSocketMessage = function(data) {
     const tx = db.transaction('wittrs', 'readwrite')
     const store = tx.objectStore('wittrs')
     messages.forEach(message => { store.put(message) })
+
+    // TODO: keep the newest 30 entries in 'wittrs',
+    // but delete the rest.
+    //
+    // Hint: you can use .openCursor(null, 'prev') to open a
+    // cursor that goes through an index/store backwards.
   })
 
   this._postsView.addPosts(messages)
