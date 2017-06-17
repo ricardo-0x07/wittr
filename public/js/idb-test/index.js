@@ -4,17 +4,20 @@
 import idb from 'idb'
 import people from './people'
 
-const DB = idb.open('test-db', 3, function(upgradeDb) {
+const DB = idb.open('test-db', 4, function(upgradeDb) {
   // NOTE: `upgradeDB.oldVersion` is how you deal with multiple versions
   switch(upgradeDb.oldVersion) {
     case 0:
-      const kvStore = upgradeDb.createObjectStore('keyval')
-      kvStore.put('world', 'hello')
+      const store1 = upgradeDb.createObjectStore('keyval')
+      store1.put('world', 'hello')
     case 1:
       upgradeDb.createObjectStore('people', {keyPath: 'name'})
     case 2:
-      const peopleStore = upgradeDb.transaction.objectStore('people')
-      peopleStore.createIndex('animal', 'favoriteAnimal')
+      const store2 = upgradeDb.transaction.objectStore('people')
+      store2.createIndex('animal', 'favoriteAnimal')
+    case 3:
+      const store3 = upgradeDb.transaction.objectStore('people')
+      store3.createIndex('age', 'age')
   }
 })
 
@@ -62,3 +65,12 @@ DB.then(db => {
 
   return animalIdx.getAll('cat')
 }).then(people => console.log('Cat people:', people))
+
+// List all people, ordered by age
+DB.then(db => {
+  const tx = db.transaction('people')
+  const store = tx.objectStore('people')
+  const ageIdx = store.index('age')
+
+  return ageIdx.getAll()
+}).then(people => console.log('People by age:', people))
