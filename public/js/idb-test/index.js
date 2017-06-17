@@ -21,6 +21,7 @@ const DB = idb.open('test-db', 4, function(upgradeDb) {
   }
 })
 
+
 // Reading from the DB
 DB.then(db => {
   const tx = db.transaction('keyval')
@@ -29,6 +30,7 @@ DB.then(db => {
 }).then(function(val) {
   console.log(`store['hello'] -> ${val}`)
 })
+
 
 // Writing to the DB
 DB.then(db => {
@@ -39,6 +41,7 @@ DB.then(db => {
 }).then(function() {
   console.log("Added foo:bar to 'keyval' store")
 })
+
 
 // Save favorite animal
 DB.then(db => {
@@ -52,28 +55,32 @@ DB.then(db => {
 DB.then(db => {
   const tx = db.transaction('people', 'readwrite')
   const store = tx.objectStore('people')
+
   people.forEach(p => store.put(p))
 
   return tx.complete
 }).then(() => console.log('People added'))
 
+
 // List all cat people
 DB.then(db => {
   const tx = db.transaction('people')
   const store = tx.objectStore('people')
-  const animalIdx = store.index('animal')
+  const animalIndex = store.index('animal')
 
-  return animalIdx.getAll('cat')
+  return animalIndex.getAll('cat')
 }).then(people => console.log('Cat people:', people))
+
 
 // List all people, ordered by age
 DB.then(db => {
   const tx = db.transaction('people')
   const store = tx.objectStore('people')
-  const ageIdx = store.index('age')
+  const ageIndex = store.index('age')
 
-  return ageIdx.getAll()
+  return ageIndex.getAll()
 }).then(people => console.log('People by age:', people))
+
 
 // Iterating through a store, using cursor
 DB.then(db => {
