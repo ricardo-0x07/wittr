@@ -8,8 +8,8 @@ const DB = idb.open('test-db', 1, function(upgradeDb) {
 // Reading from the DB
 DB.then(db => {
   const tx = db.transaction('keyval')
-  const kvStore = tx.objectStore('keyval')
-  return kvStore.get('hello')
+  const store = tx.objectStore('keyval')
+  return store.get('hello')
 }).then(function(val) {
   console.log(`store['hello'] -> ${val}`)
 })
@@ -17,8 +17,8 @@ DB.then(db => {
 // Writing to the DB
 DB.then(db => {
   const tx = db.transaction('keyval', 'readwrite')
-  const kvStore = tx.objectStore('keyval')
-  kvStore.put('bar', 'foo')
+  const store = tx.objectStore('keyval')
+  store.put('bar', 'foo')
   return tx.complete
 }).then(function() {
   console.log("Added foo:bar to 'keyval' store")
