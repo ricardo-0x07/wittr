@@ -14,11 +14,12 @@ function openDatabase() {
     return Promise.resolve()
   }
 
-  // TODO: return a promise for a database called 'wittr'
-  // that contains one objectStore: 'wittrs'
-  // that uses 'id' as its key
-  // and has an index called 'by-date', which is sorted
-  // by the 'time' property
+  return idb.open('wittr', 1, function(upgradeDB) {
+    const store = upgradeDB.createObjectStore('wittrs', {
+      keyPath: 'id'
+    })
+    store.createIndex('by-date', 'time')
+  })
 }
 
 export default function IndexController(container: HTMLElement) {
