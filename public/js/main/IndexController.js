@@ -39,9 +39,11 @@ export default function IndexController(container: HTMLElement) {
 }
 
 IndexController.prototype._registerServiceWorker = function() {
+  if (!navigator.serviceWorker) return
+
   const indexController = this
 
-  invariant(navigator.serviceWorker, NO_SW_MESSAGE)
+  // invariant(navigator.serviceWorker, NO_SW_MESSAGE)
 
   navigator.serviceWorker.register('/sw.js').then(function(reg) {
     if (process.env.NODE_ENV === 'development')
@@ -154,6 +156,13 @@ IndexController.prototype._openSocket = function() {
 
 // called when the web socket sends message data
 IndexController.prototype._onSocketMessage = function(data) {
-  var messages = JSON.parse(data)
+  const messages = JSON.parse(data)
+
+  this._dbPromise.then(function(db) {
+    if (!db) return
+
+    // TODO: put each message into 'wittrs' object store
+  })
+
   this._postsView.addPosts(messages)
 }
