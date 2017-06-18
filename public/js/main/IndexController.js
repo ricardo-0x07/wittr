@@ -5,22 +5,29 @@ import invariant from 'invariant'
 import PostsView from './views/Posts'
 import ToastsView from './views/Toasts'
 
+import checkIDB from '../utils/checkIDB'
+
 import {
   NO_SW_MESSAGE,
   MAX_WITTRS,
   CLEAN_IMG_CACHE_INTERVAL,
 } from './config'
 
-// TODO: resolving empty promise is a little too smelly - error out or nullify
-// return value instead of just going on silently?
+// NOTE: Resolving empty promise is a little too smelly. Instead,
+// simply check if IDB store is available before accessing it.
+window.__IDB_AVAILABLE__= false
 function openDatabase() {
-  // If the browser doesn't support service worker,
-  // we don't care about having a database
+  const dbErrMessage = `${NO_SW_MESSAGE}. This means you won't have access to IDB store.`
+
   if (!navigator.serviceWorker) {
-    return Promise.resolve()
+    console.error(dbErrMessage)
+    return
   }
 
   return idb.open('wittr', 1, function(upgradeDB) {
+    // TODO: more robust check of DB creation
+    window.__IDB_AVAILABLE__ = true
+
     const store = upgradeDB.createObjectStore('wittrs', {
       keyPath: 'id'
     })
@@ -33,10 +40,10 @@ export default function IndexController(container: HTMLElement) {
   invariant(container, "The `container` provided is not an HTML Element!")
 
   this._container = container
+
   this._postsView = new PostsView(this._container)
   this._toastsView = new ToastsView(this._container)
   this._lostConnectionToast = null
-
   this._dbPromise = openDatabase()
   this._registerServiceWorker()
   this._cleanImageCache()
@@ -106,13 +113,14 @@ IndexController.prototype._registerServiceWorker = function() {
 
 
 IndexController.prototype._showCachedMessages = function() {
+  if (!checkIDB) return
   const indexController = this
 
   return this._dbPromise.then(function(db) {
     // if we're already showing posts, eg shift-refresh
     // or the very first load, there's no point fetching
     // posts from IDB
-    if (!db || indexController._postsView.showingPosts()) return
+    if (indexController._postsView.showingPosts()) return
 
     // NOTE: passing wittr msgs in IDB to _postsView
     // - sorted in order of date, starting with the latest.
@@ -132,6 +140,7 @@ IndexController.prototype._showCachedMessages = function() {
 // notify the user when the installation has successfully finished.
 IndexController.prototype._trackInstalling = function(worker: ServiceWorker) {
   const indexController = this
+
   worker.addEventListener('statechange', () => {
     if (worker.state === 'installed') {
       indexController._updateReady(worker)
@@ -142,6 +151,7 @@ IndexController.prototype._trackInstalling = function(worker: ServiceWorker) {
 
 IndexController.prototype._updateReady = function(worker: ServiceWorker, updateMessage?: string) {
   const msg = updateMessage || 'New Version Available'
+
   const toast = this._toastsView.show(msg, {
     buttons: ['refresh', 'dismiss']
   })
@@ -153,9 +163,9 @@ IndexController.prototype._updateReady = function(worker: ServiceWorker, updateM
 }
 
 IndexController.prototype._cleanImageCache = function() {
-  return this._dbPromise.then(function(db) {
-    if (!db) return
+  if (!checkIDB) return
 
+  return this._dbPromise.then(function(db) {
     // TODO:
     //  1. open 'wittr' object store, get all messages, then
     //     gather all photo urls.
@@ -214,10 +224,10 @@ IndexController.prototype._openSocket = function() {
 IndexController.prototype._onSocketMessage = function(data) {
   const messages = JSON.parse(data)
 
+  if (!checkIDB) return
+
   // populate 'wittrs' store
   this._dbPromise.then(function(db) {
-    if (!db) return
-
     const tx = db.transaction('wittrs', 'readwrite')
     const store = tx.objectStore('wittrs')
     messages.forEach(message => { store.put(message) })
