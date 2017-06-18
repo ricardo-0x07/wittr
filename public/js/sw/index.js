@@ -2,18 +2,14 @@
 
 const STATIC_CACHE_NAME = 'wittr-static-v8'
 const CONTENT_IMG_CACHE = 'wittr-content-imgs'
+const allCaches = [ STATIC_CACHE_NAME, CONTENT_IMG_CACHE ]
 
-// all the caches we care about
-const allCaches = [
-  STATIC_CACHE_NAME,
-  CONTENT_IMG_CACHE,
-]
 
-self.addEventListener('install', function(event) {
+self.addEventListener('install', function(event: InstallEvent) {
   event.waitUntil(
     caches.open(STATIC_CACHE_NAME).then(function(cache) {
       return cache.addAll([
-        '/skeleton',    // caching skeleton (app "shell") instead of root page
+        '/skeleton',    // cache app shell
         '/js/main.js',
         'css/main.css',
         'imgs/icon.png',
@@ -25,16 +21,13 @@ self.addEventListener('install', function(event) {
 })
 
 
-self.addEventListener('activate', function(event) {
+self.addEventListener('activate', function(event: ExtendableEvent) {
   event.waitUntil(
-    caches.keys().then(function(cacheNames) {
-      return Promise.all(
-        cacheNames.filter(cacheName => {
-          return cacheName.startsWith('wittr-') &&
-                 !allCaches.includes(cacheName)
-        }).map(cacheName => caches.delete(cacheName))
-      )
-    })
+    caches.keys().then(cacheNames => Promise.all(
+      cacheNames
+        .filter(cacheName => cacheName.startsWith('wittr-') && !allCaches.includes(cacheName))
+        .map(cacheName => caches.delete(cacheName))
+    ))
   )
 })
 
@@ -55,8 +48,7 @@ self.addEventListener('fetch', function(event: FetchEvent) {
       return
     }
 
-    // TODO: respond to avatar urls by responding with
-    // the return value of serveAvatar(event.request)
+    // avatars (non-static)
     if (requestUrl.pathname.startsWith('/avatars/')) {
       event.respondWith(serveAvatar(event.request))
       return
@@ -72,7 +64,7 @@ self.addEventListener('fetch', function(event: FetchEvent) {
 
 
 // `skipWaiting` if we get the right kind of message from the UI
-self.addEventListener('message', function(event) {
+self.addEventListener('message', function(event: ServiceWorkerMessageEvent) {
   if (event.data.action === 'skipWaiting') {
     self.skipWaiting()
   }
@@ -82,22 +74,12 @@ self.addEventListener('message', function(event) {
 /// HELPERS ///
 
 function serveAvatar(request: Request) {
-  // Avatar urls look like:
-  // avatars/sam-2x.jpg
-  // But storageUrl has the -2x.jpg bit missing.
-  // Use this url to store & match the image in the cache.
-  // This means you only store one copy of each avatar.
   const storageUrl = request.url.replace(/-\dx\.jpg$/, '')
 
-  // TODO: return images from the "wittr-content-imgs" cache
-  // if they're in there. But afterwards, go to the network
-  // to update the entry in the cache.
-  //
-  // Note that this is slightly different to servePhoto!
   return caches.open(CONTENT_IMG_CACHE)
     .then(cache => cache.match(storageUrl).then(function(response) {
-      // fetch avatar regardless of cache HIT --remember that some users
-      // change their avatars quite frequently
+      // Fetch avatar regardless of cache HIT/MISS
+      // (some users change their avatars frequently)
       const networkFetch = fetch(request).then(function(networkResponse) {
         cache.put(storageUrl, networkResponse.clone())
         return networkResponse
