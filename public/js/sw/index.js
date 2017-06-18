@@ -9,7 +9,6 @@ const allCaches = [
   CONTENT_IMG_CACHE,
 ]
 
-
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(STATIC_CACHE_NAME).then(function(cache) {

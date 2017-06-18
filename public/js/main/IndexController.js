@@ -7,6 +7,8 @@ import ToastsView from './views/Toasts'
 
 import checkIDB from '../utils/checkIDB'
 
+import type { Message } from '../utils/types'
+
 import {
   NO_SW_MESSAGE,
   MAX_WITTRS,
@@ -75,7 +77,7 @@ IndexController.prototype._registerServiceWorker = function() {
     if (process.env.NODE_ENV === 'development')
       self.__SW_REGISTRATION__ = reg
 
-    // NOTE: Not loaded via SW, so we know it's the latest version
+    // $FlowFixMe - NOTE: Not loaded via SW, so we know it's the latest version
     if (!Boolean(navigator.serviceWorker.controller)) // eslint-disable-line no-extra-boolean-cast
       return
 
@@ -101,6 +103,7 @@ IndexController.prototype._registerServiceWorker = function() {
 
   // Listen for controlling SW changies & reload when appropriate.
   let refreshing = false
+  // $FlowFixMe
   navigator.serviceWorker.addEventListener('controllerchange', (event) => {
     if (process.env.NODE_ENV === 'development')
       console.log('[sw#controllerchange]', event)
@@ -171,6 +174,27 @@ IndexController.prototype._cleanImageCache = function() {
     //     gather all photo urls.
     //  2. open 'wittr-content-imgs' cache, and delete any entry
     //     you no longer need.
+    const imagesNeeded = []
+
+    const tx = db.transaction('wittrs')
+    const _msgs: Promise<Message[]> = tx.objectStore('wittrs').getAll()
+    _msgs.then(function(messages) {
+      messages.forEach(message => {
+        if (message.photo) {
+          imagesNeeded.push(message.photo)
+        }
+      })
+
+      // TODO: extract cache name to config-time constant
+      return caches.open('wittr-content-imgs')
+    }).then(cache => cache.keys().then(function(requests) {
+      requests.forEach(req => {
+        const url = new URL(req.url)
+        if (!imagesNeeded.includes(url.pathname)) {
+          cache.delete(req)
+        }
+      })
+    }))
   })
 }
 
@@ -202,6 +226,7 @@ IndexController.prototype._openSocket = function() {
 
   ws.addEventListener('message', function(event) {
     requestAnimationFrame(function() {
+      // $FlowFixMe
       indexController._onSocketMessage(event.data)
     })
   })
