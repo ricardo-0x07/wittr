@@ -8,8 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "serve": "cross-env NODE_ENV=development gulp serve"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Bruno Bakundwa <iam@corrni.io>",
+  "license": "MIT",
   "private": true,
   "devDependencies": {
     "babel-eslint": "^7.2.3",
