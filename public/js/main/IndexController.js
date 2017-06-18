@@ -8,7 +8,7 @@ import ToastsView from './views/Toasts'
 import {NO_SW_MESSAGE, MAX_WITTRS} from './config'
 
 // type t_db = Promise<void> | Promise<IDBDatabase>
-function openDatabase(): * {
+function openDatabase() {
   // If the browser doesn't support service worker,
   // we don't care about having a database
   if (!navigator.serviceWorker) {
@@ -55,7 +55,7 @@ IndexController.prototype._registerServiceWorker = function() {
     if (process.env.NODE_ENV === 'development')
       self.__SW_REGISTRATION__ = reg
 
-    // $FlowFixMe -- NOTE: Not loaded via SW, so we know it's the latest version
+    // NOTE: Not loaded via SW, so we know it's the latest version
     if (!Boolean(navigator.serviceWorker.controller)) // eslint-disable-line no-extra-boolean-cast
       return
 
@@ -81,7 +81,6 @@ IndexController.prototype._registerServiceWorker = function() {
 
   // Listen for controlling SW changies & reload when appropriate.
   let refreshing = false
-  // $FlowFixMe
   navigator.serviceWorker.addEventListener('controllerchange', (event) => {
     if (process.env.NODE_ENV === 'development')
       console.log('[sw#controllerchange]', event)
@@ -169,7 +168,6 @@ IndexController.prototype._openSocket = function() {
 
   ws.addEventListener('message', function(event) {
     requestAnimationFrame(function() {
-      // $FlowFixMe
       indexController._onSocketMessage(event.data)
     })
   })

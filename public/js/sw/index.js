@@ -69,7 +69,7 @@ function servePhoto(request: Request) {
   // This means you only store one copy of each photo.
   const storageUrl = request.url.replace(/-\d+px\.jpg$/, '')
 
-  // NOTE: return images from the "wittr-content-imgs" cache
+  // Return images from the "wittr-content-imgs" cache
   // if they're in there. Otherwise, fetch the images from
   // the network, put them into the cache, and send it back
   // to the browser.
