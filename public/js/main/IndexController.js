@@ -5,9 +5,14 @@ import invariant from 'invariant'
 import PostsView from './views/Posts'
 import ToastsView from './views/Toasts'
 
-import {NO_SW_MESSAGE, MAX_WITTRS} from './config'
+import {
+  NO_SW_MESSAGE,
+  MAX_WITTRS,
+  CLEAN_IMG_CACHE_INTERVAL,
+} from './config'
 
-// type t_db = Promise<void> | Promise<IDBDatabase>
+// TODO: resolving empty promise is a little too smelly - error out or nullify
+// return value instead of just going on silently?
 function openDatabase() {
   // If the browser doesn't support service worker,
   // we don't care about having a database
@@ -26,14 +31,22 @@ function openDatabase() {
 
 export default function IndexController(container: HTMLElement) {
   invariant(container, "The `container` provided is not an HTML Element!")
+
   this._container = container
   this._postsView = new PostsView(this._container)
   this._toastsView = new ToastsView(this._container)
   this._lostConnectionToast = null
+
   this._dbPromise = openDatabase()
   this._registerServiceWorker()
+  this._cleanImageCache()
 
   const indexController = this
+
+  // periodically clean image cache
+  setInterval(function() {
+    indexController._cleanImageCache()
+  }, CLEAN_IMG_CACHE_INTERVAL)
 
   this._showCachedMessages().then(() => {
     indexController._openSocket()
@@ -139,6 +152,17 @@ IndexController.prototype._updateReady = function(worker: ServiceWorker, updateM
   })
 }
 
+IndexController.prototype._cleanImageCache = function() {
+  return this._dbPromise.then(function(db) {
+    if (!db) return
+
+    // TODO:
+    //  1. open 'wittr' object store, get all messages, then
+    //     gather all photo urls.
+    //  2. open 'wittr-content-imgs' cache, and delete any entry
+    //     you no longer need.
+  })
+}
 
 // open a connection to the server for live updates
 IndexController.prototype._openSocket = function() {

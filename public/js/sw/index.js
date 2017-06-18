@@ -9,6 +9,7 @@ const allCaches = [
   CONTENT_IMG_CACHE,
 ]
 
+
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(STATIC_CACHE_NAME).then(function(cache) {
@@ -24,6 +25,7 @@ self.addEventListener('install', function(event) {
   )
 })
 
+
 self.addEventListener('activate', function(event) {
   event.waitUntil(
     caches.keys().then(function(cacheNames) {
@@ -36,6 +38,7 @@ self.addEventListener('activate', function(event) {
     })
   )
 })
+
 
 self.addEventListener('fetch', function(event: FetchEvent) {
   const requestUrl = new URL(event.request.url)
@@ -61,20 +64,20 @@ self.addEventListener('fetch', function(event: FetchEvent) {
   )
 })
 
+
+// `skipWaiting` if we get the right kind of message from the UI
+self.addEventListener('message', function(event) {
+  if (event.data.action === 'skipWaiting') {
+    self.skipWaiting()
+  }
+})
+
+
+/// HELPERS ///
+
 function servePhoto(request: Request) {
-  // Photo urls look like:
-  // /photos/9-8028-7527734776-e1d2bda28e-800px.jpg
-  // But storageUrl has the -800px.jpg bit missing.
-  // Use this url to store & match the image in the cache.
-  // This means you only store one copy of each photo.
   const storageUrl = request.url.replace(/-\d+px\.jpg$/, '')
 
-  // Return images from the "wittr-content-imgs" cache
-  // if they're in there. Otherwise, fetch the images from
-  // the network, put them into the cache, and send it back
-  // to the browser.
-  //
-  // HINT: cache.put supports a plain url as the first parameter
   return caches.open(CONTENT_IMG_CACHE)
     .then(cache => cache.match(storageUrl).then(function(response) {
       if (response) return response
@@ -85,10 +88,3 @@ function servePhoto(request: Request) {
       })
     }))
 }
-
-// `skipWaiting` if we get the right kind of message from the UI
-self.addEventListener('message', function(event) {
-  if (event.data.action === 'skipWaiting') {
-    self.skipWaiting()
-  }
-})
