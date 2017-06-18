@@ -71,8 +71,6 @@ IndexController.prototype._registerServiceWorker = function() {
 
   const indexController = this
 
-  // invariant(navigator.serviceWorker, NO_SW_MESSAGE)
-
   navigator.serviceWorker.register('/sw.js').then(function(reg) {
     if (process.env.NODE_ENV === 'development')
       self.__SW_REGISTRATION__ = reg
