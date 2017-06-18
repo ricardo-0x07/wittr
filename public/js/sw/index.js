@@ -42,18 +42,21 @@ self.addEventListener('activate', function(event) {
 self.addEventListener('fetch', function(event: FetchEvent) {
   const requestUrl = new URL(event.request.url)
 
-  // app shell
   if (requestUrl.origin === location.origin) {
+    // app shell (static)
     if (requestUrl.pathname === '/') {
       event.respondWith(caches.match('/skeleton'))
       return
     }
-  }
 
-  // photos (non-static content)
-  if (requestUrl.pathname.startsWith('/photos/')) {
-    event.respondWith(servePhoto(event.request))
-    return
+    // photos (non-static)
+    if (requestUrl.pathname.startsWith('/photos/')) {
+      event.respondWith(servePhoto(event.request))
+      return
+    }
+
+    // TODO: respond to avatar urls by responding with
+    // the return value of serveAvatar(event.request)
   }
 
   event.respondWith(
@@ -73,6 +76,21 @@ self.addEventListener('message', function(event) {
 
 
 /// HELPERS ///
+
+function serveAvatar(request: Request) {
+  // Avatar urls look like:
+  // avatars/sam-2x.jpg
+  // But storageUrl has the -2x.jpg bit missing.
+  // Use this url to store & match the image in the cache.
+  // This means you only store one copy of each avatar.
+  const storageUrl = request.url.replace(/-\dx\.jpg$/, '')
+
+  // TODO: return images from the "wittr-content-imgs" cache
+  // if they're in there. But afterwards, go to the network
+  // to update the entry in the cache.
+  //
+  // Note that this is slightly different to servePhoto!
+}
 
 function servePhoto(request: Request) {
   const storageUrl = request.url.replace(/-\d+px\.jpg$/, '')

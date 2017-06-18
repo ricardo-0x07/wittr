@@ -167,11 +167,6 @@ IndexController.prototype._cleanImageCache = function() {
   if (!checkIDB) return
 
   return this._dbPromise.then(function(db) {
-    // TODO:
-    //  1. open 'wittr' object store, get all messages, then
-    //     gather all photo urls.
-    //  2. open 'wittr-content-imgs' cache, and delete any entry
-    //     you no longer need.
     const imagesNeeded = []
 
     const tx = db.transaction('wittrs')
@@ -255,10 +250,7 @@ IndexController.prototype._onSocketMessage = function(data) {
     const store = tx.objectStore('wittrs')
     messages.forEach(message => { store.put(message) })
 
-    // TODO: keep the newest `MAX_WITTRS` entries in 'wittrs' store,
-    // but delete the rest.
-    // Hint: you can use .openCursor(null, 'prev') to open a
-    // cursor that goes through an index/store backwards.
+    // keep `MAX_WITTRS` of the latest wittrs
     store.index('by-date').openCursor(null, 'prev')
       .then(cursor => cursor.advance(MAX_WITTRS))
       .then(function deleteRest(cursor) {
