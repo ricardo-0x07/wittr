@@ -1,4 +1,4 @@
-import parseHTML from '../../utils/parseHTML';
+import parseHTML from '../../utils/parseHTML'
 
 export default class Spinner {
   constructor() {
@@ -18,32 +18,32 @@ export default class Spinner {
           '</div>' +
         '</div>' +
       '</div>' +
-    '').firstChild;
+    '').firstChild
 
-    this._showTimeout = null;
-    this.container.style.display = 'none';
+    this._showTimeout = null
+    this.container.style.display = 'none'
 
     var animEndListener = event => {
       if (event.target == this.container) {
-        this.container.style.display = 'none';
+        this.container.style.display = 'none'
       }
-    };
+    }
 
-    this.container.addEventListener('webkitAnimationEnd', animEndListener);
-    this.container.addEventListener('animationend', animEndListener);
+    this.container.addEventListener('webkitAnimationEnd', animEndListener)
+    this.container.addEventListener('animationend', animEndListener)
   }
 
   show(delay = 300) {
-    clearTimeout(this._showTimeout);
-    this.container.style.display = 'none';
-    this.container.classList.remove('cooldown');
+    clearTimeout(this._showTimeout)
+    this.container.style.display = 'none'
+    this.container.classList.remove('cooldown')
     this._showTimeout = setTimeout(_ => {
-      this.container.style.display = '';
-    }, delay);
+      this.container.style.display = ''
+    }, delay)
   }
 
   hide() {
-    clearTimeout(this._showTimeout);
-    this.container.classList.add('cooldown');
+    clearTimeout(this._showTimeout)
+    this.container.classList.add('cooldown')
   }
 }
