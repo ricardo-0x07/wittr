@@ -5,17 +5,31 @@ import invariant from 'invariant'
 import PostsView from './views/Posts'
 import ToastsView from './views/Toasts'
 
-import {NO_SW_MESSAGE, MAX_WITTRS} from './config'
+import checkIDB from '../utils/checkIDB'
 
-// type t_db = Promise<void> | Promise<IDBDatabase>
-function openDatabase(): * {
-  // If the browser doesn't support service worker,
-  // we don't care about having a database
+import type { Message } from '../utils/types'
+
+import {
+  NO_SW_MESSAGE,
+  MAX_WITTRS,
+  CLEAN_IMG_CACHE_INTERVAL,
+} from './config'
+
+// NOTE: Resolving empty promise is a little too smelly. Instead,
+// simply check if IDB store is available before accessing it.
+window.__IDB_AVAILABLE__= false
+function openDatabase() {
+  const dbErrMessage = `${NO_SW_MESSAGE}. This means you won't have access to IDB store.`
+
   if (!navigator.serviceWorker) {
-    return Promise.resolve()
+    console.error(dbErrMessage)
+    return
   }
 
   return idb.open('wittr', 1, function(upgradeDB) {
+    // TODO: more robust check of DB creation
+    window.__IDB_AVAILABLE__ = true
+
     const store = upgradeDB.createObjectStore('wittrs', {
       keyPath: 'id'
     })
@@ -26,14 +40,22 @@ function openDatabase(): * {
 
 export default function IndexController(container: HTMLElement) {
   invariant(container, "The `container` provided is not an HTML Element!")
+
   this._container = container
+
   this._postsView = new PostsView(this._container)
   this._toastsView = new ToastsView(this._container)
   this._lostConnectionToast = null
   this._dbPromise = openDatabase()
   this._registerServiceWorker()
+  this._cleanImageCache()
 
   const indexController = this
+
+  // periodically clean image cache
+  setInterval(function() {
+    indexController._cleanImageCache()
+  }, CLEAN_IMG_CACHE_INTERVAL)
 
   this._showCachedMessages().then(() => {
     indexController._openSocket()
@@ -49,13 +71,11 @@ IndexController.prototype._registerServiceWorker = function() {
 
   const indexController = this
 
-  // invariant(navigator.serviceWorker, NO_SW_MESSAGE)
-
   navigator.serviceWorker.register('/sw.js').then(function(reg) {
     if (process.env.NODE_ENV === 'development')
       self.__SW_REGISTRATION__ = reg
 
-    // $FlowFixMe -- NOTE: Not loaded via SW, so we know it's the latest version
+    // $FlowFixMe - NOTE: Not loaded via SW, so we know it's the latest version
     if (!Boolean(navigator.serviceWorker.controller)) // eslint-disable-line no-extra-boolean-cast
       return
 
@@ -94,13 +114,14 @@ IndexController.prototype._registerServiceWorker = function() {
 
 
 IndexController.prototype._showCachedMessages = function() {
+  if (!checkIDB) return
   const indexController = this
 
   return this._dbPromise.then(function(db) {
     // if we're already showing posts, eg shift-refresh
     // or the very first load, there's no point fetching
     // posts from IDB
-    if (!db || indexController._postsView.showingPosts()) return
+    if (indexController._postsView.showingPosts()) return
 
     // NOTE: passing wittr msgs in IDB to _postsView
     // - sorted in order of date, starting with the latest.
@@ -120,6 +141,7 @@ IndexController.prototype._showCachedMessages = function() {
 // notify the user when the installation has successfully finished.
 IndexController.prototype._trackInstalling = function(worker: ServiceWorker) {
   const indexController = this
+
   worker.addEventListener('statechange', () => {
     if (worker.state === 'installed') {
       indexController._updateReady(worker)
@@ -130,6 +152,7 @@ IndexController.prototype._trackInstalling = function(worker: ServiceWorker) {
 
 IndexController.prototype._updateReady = function(worker: ServiceWorker, updateMessage?: string) {
   const msg = updateMessage || 'New Version Available'
+
   const toast = this._toastsView.show(msg, {
     buttons: ['refresh', 'dismiss']
   })
@@ -140,6 +163,33 @@ IndexController.prototype._updateReady = function(worker: ServiceWorker, updateM
   })
 }
 
+IndexController.prototype._cleanImageCache = function() {
+  if (!checkIDB) return
+
+  return this._dbPromise.then(function(db) {
+    const imagesNeeded = []
+
+    const tx = db.transaction('wittrs')
+    const _msgs: Promise<Message[]> = tx.objectStore('wittrs').getAll()
+    _msgs.then(function(messages) {
+      messages.forEach(message => {
+        if (message.photo) {
+          imagesNeeded.push(message.photo)
+        }
+      })
+
+      // TODO: extract cache name to config-time constant
+      return caches.open('wittr-content-imgs')
+    }).then(cache => cache.keys().then(function(requests) {
+      requests.forEach(req => {
+        const url = new URL(req.url)
+        if (!imagesNeeded.includes(url.pathname)) {
+          cache.delete(req)
+        }
+      })
+    }))
+  })
+}
 
 // open a connection to the server for live updates
 IndexController.prototype._openSocket = function() {
@@ -192,18 +242,15 @@ IndexController.prototype._openSocket = function() {
 IndexController.prototype._onSocketMessage = function(data) {
   const messages = JSON.parse(data)
 
+  if (!checkIDB) return
+
   // populate 'wittrs' store
   this._dbPromise.then(function(db) {
-    if (!db) return
-
     const tx = db.transaction('wittrs', 'readwrite')
     const store = tx.objectStore('wittrs')
     messages.forEach(message => { store.put(message) })
 
-    // TODO: keep the newest `MAX_WITTRS` entries in 'wittrs' store,
-    // but delete the rest.
-    // Hint: you can use .openCursor(null, 'prev') to open a
-    // cursor that goes through an index/store backwards.
+    // keep `MAX_WITTRS` of the latest wittrs
     store.index('by-date').openCursor(null, 'prev')
       .then(cursor => cursor.advance(MAX_WITTRS))
       .then(function deleteRest(cursor) {
