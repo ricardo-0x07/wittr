@@ -8,4 +8,4 @@ export const CLEAN_IMG_CACHE_INTERVAL = 1000 * 60 * 5
 
 // How many [latest] messages should the store  keep?
 // DEFAULT = 30
-export const MAX_WITTRS = 30
+export const MAX_MESSAGES = 30

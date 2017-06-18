@@ -11,7 +11,7 @@ import type { Message } from '../utils/types'
 
 import {
   NO_SW_MESSAGE,
-  MAX_WITTRS,
+  MAX_MESSAGES,
   CLEAN_IMG_CACHE_INTERVAL,
 } from './config'
 
@@ -167,25 +167,24 @@ IndexController.prototype._cleanImageCache = function() {
   if (!checkIDB) return
 
   return this._dbPromise.then(function(db) {
-    const imagesNeeded = []
+    let imagesNeeded: string[] = []
 
     const tx = db.transaction('wittrs')
     const _msgs: Promise<Message[]> = tx.objectStore('wittrs').getAll()
+
     _msgs.then(function(messages) {
       messages.forEach(message => {
-        if (message.photo) {
+        if (message.photo)
           imagesNeeded.push(message.photo)
-        }
       })
 
       // TODO: extract cache name to config-time constant
       return caches.open('wittr-content-imgs')
     }).then(cache => cache.keys().then(function(requests) {
-      requests.forEach(req => {
-        const url = new URL(req.url)
-        if (!imagesNeeded.includes(url.pathname)) {
-          cache.delete(req)
-        }
+      requests.forEach(request => {
+        const url = new URL(request.url)
+        if (!imagesNeeded.includes(url.pathname))
+          cache.delete(request)
       })
     }))
   })
@@ -240,7 +239,7 @@ IndexController.prototype._openSocket = function() {
 
 // called when the web socket sends message data
 IndexController.prototype._onSocketMessage = function(data) {
-  const messages = JSON.parse(data)
+  const messages: Message[] = JSON.parse(data)
 
   if (!checkIDB) return
 
@@ -248,15 +247,18 @@ IndexController.prototype._onSocketMessage = function(data) {
   this._dbPromise.then(function(db) {
     const tx = db.transaction('wittrs', 'readwrite')
     const store = tx.objectStore('wittrs')
-    messages.forEach(message => { store.put(message) })
 
-    // keep `MAX_WITTRS` of the latest wittrs
+    messages.forEach(message => store.put(message))
+
+    // only keep `MAX_MESSAGES` of the latest wittrs
     store.index('by-date').openCursor(null, 'prev')
-      .then(cursor => cursor.advance(MAX_WITTRS))
+      .then(cursor => cursor.advance(MAX_MESSAGES))
       .then(function deleteRest(cursor) {
         if (!cursor) return
+
         cursor.delete()
-        return cursor.continue().then(deleteRest)
+        return cursor.continue()
+          .then(deleteRest)
       })
   })
 
