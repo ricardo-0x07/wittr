@@ -1,19 +1,34 @@
-import postTemplate from './../../../../templates/post.hbs'
+// @flow
+
 import toArray from 'lodash/lang/toArray'
+
+// $FlowFixMe
+import postTemplate from './../../../../templates/post.hbs'
 import parseHTML from './../../utils/parseHTML'
 import humanReadableTimeDiff from './../../utils/humanReadableTimeDiff'
 
-const maxMessages = 30
+import {MAX_MESSAGES} from '../config'
 
-export default function Posts(container) {
-  var posts = this
-
+/**
+ * Container for `post` Messages.
+ * @constructor
+ * @param {HTMLElement} container
+ */
+function Posts(container: HTMLElement) {
+  const posts = this
   this._container = container
-  this._scroller = container.querySelector('.posts')
+
+  const scroller = container.querySelector('.posts')
+  if (!scroller) { throw Error("Could not find .posts container!") }
+  else { this._scroller = scroller }
+
+  const newPostAlert = container.querySelector('.posts-alert')
+  if (!newPostAlert) {throw Error("Could not find .post-alert container!") }
+  else { this._newPostAlert = newPostAlert }
+
   this._lastTimeUpdate = 0
-  this._newPostAlert = container.querySelector('.posts-alert')
   this._scrollUpdatePending = false
-  
+
   this._timesUpdate()
 
   // update times on an interval
@@ -34,7 +49,7 @@ export default function Posts(container) {
   })
 }
 
-// update all the <time> elements, unless we've 
+// update all the <time> elements, unless we've
 // already done so within the last 10 seconds
 Posts.prototype._softTimesUpdate = function() {
   if (Date.now() - this._lastTimeUpdate < 1000 * 10) return
@@ -43,11 +58,15 @@ Posts.prototype._softTimesUpdate = function() {
 
 // update all the <time> elements
 Posts.prototype._timesUpdate = function() {
-  var postTimeEls = toArray(this._container.querySelectorAll('.post-time'))
+  const postTimeEls: HTMLElement[] = toArray(this._container.querySelectorAll('.post-time'))
+
   postTimeEls.forEach(function(timeEl) {
-    var postDate = new Date(timeEl.getAttribute('datetime'))
+    // $FlowFixMe
+    const postDate = new Date(timeEl.getAttribute('datetime'))
+
     timeEl.textContent = humanReadableTimeDiff(postDate)
   })
+
   this._lastTimeUpdate = Date.now()
 }
 
@@ -71,11 +90,11 @@ Posts.prototype.addPosts = function(messages) {
   // add to the dom
   var nodes = parseHTML(htmlString)
   this._scroller.insertBefore(nodes, this._scroller.firstChild)
-  
+
   // remove really old posts to avoid too much content
   var posts = toArray(this._scroller.querySelectorAll('.post'))
 
-  posts.slice(maxMessages).forEach(function(post) {
+  posts.slice(MAX_MESSAGES).forEach(function(post) {
     post.parentNode.removeChild(post)
   })
 
@@ -100,3 +119,5 @@ Posts.prototype.getLatestPostDate = function(messages) {
 Posts.prototype.showingPosts = function(messages) {
   return !!this._container.querySelector('.post')
 }
+
+export default Posts

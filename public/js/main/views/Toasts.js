@@ -62,7 +62,7 @@ Toast.prototype.hide = function() {
 
 ///
 
-function Toasts(elemToAppend: HTMLElement) {
+function Toasts(elemToAppend: HTMLElement): * {
   const container = parseHTML('<div class="toasts"></div>').firstChild
 
   if (!container) throw Error("Something went wrong while creating Toasts container!")
