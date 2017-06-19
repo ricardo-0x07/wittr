@@ -41,9 +41,10 @@ function Posts(container: HTMLElement) {
   }, 1000 * 30)
 
   // listen to scrolling
-  this._scroller.addEventListener('scroll', function(event) {
+  this._scroller.addEventListener('scroll', function(event) { // eslint-disable-line no-unused-vars
     if (posts._scrollUpdatePending) return
     posts._scrollUpdatePending = true
+
     requestAnimationFrame(function() {
       posts._onScroll()
       posts._scrollUpdatePending = false
@@ -111,7 +112,7 @@ Posts.prototype.addPosts = function(messages: Message[]) {
 }
 
 // get the date of the latest post, or null if there are no posts
-Posts.prototype.getLatestPostDate = function(messages) {
+Posts.prototype.getLatestPostDate = function(messages): null | Date {
   const timeEl = this._container.querySelector('.post-time')
   if (!timeEl) return null
   return new Date(timeEl.getAttribute('datetime'))
