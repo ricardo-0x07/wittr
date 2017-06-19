@@ -1,6 +1,6 @@
 // @flow
 
-type DiffFormat = "seconds" | "minutes" | "hours" | "days"
+type DiffFormat = 'seconds' | 'minutes' | 'hours' | 'days'
 
 const duration = {
   seconds: 1000,
