@@ -9,6 +9,8 @@ import humanReadableTimeDiff from './../../utils/humanReadableTimeDiff'
 
 import {MAX_MESSAGES} from '../config'
 
+import type { Message } from '../../utils/types'
+
 /**
  * Container for `post` Messages.
  * @constructor
@@ -20,11 +22,11 @@ function Posts(container: HTMLElement) {
 
   const scroller = container.querySelector('.posts')
   if (!scroller) { throw Error("Could not find .posts container!") }
-  else { this._scroller = scroller }
+    else { this._scroller = scroller }
 
   const newPostAlert = container.querySelector('.posts-alert')
   if (!newPostAlert) {throw Error("Could not find .post-alert container!") }
-  else { this._newPostAlert = newPostAlert }
+    else { this._newPostAlert = newPostAlert }
 
   this._lastTimeUpdate = 0
   this._scrollUpdatePending = false
@@ -79,29 +81,29 @@ Posts.prototype._onScroll = function() {
 
 // processes an array of objects representing messages,
 // creates html for them, and adds them to the page
-Posts.prototype.addPosts = function(messages) {
+Posts.prototype.addPosts = function(messages: Message[]) {
   // create html for new posts
-  var oldLatestPost = this._scroller.querySelector('.post')
-  var oldLatestPostOldPosition = oldLatestPost && oldLatestPost.getBoundingClientRect()
-  var htmlString = messages.map(function(message) {
-    return postTemplate(message)
-  }).join('')
+  const oldLatestPost = this._scroller.querySelector('.post')
+  const oldLatestPostOldPosition = oldLatestPost && oldLatestPost.getBoundingClientRect()
+  const htmlString = messages
+    .map(message => postTemplate(message))
+    .join('')
 
   // add to the dom
-  var nodes = parseHTML(htmlString)
+  const nodes = parseHTML(htmlString)
   this._scroller.insertBefore(nodes, this._scroller.firstChild)
 
   // remove really old posts to avoid too much content
-  var posts = toArray(this._scroller.querySelectorAll('.post'))
-
-  posts.slice(MAX_MESSAGES).forEach(function(post) {
-    post.parentNode.removeChild(post)
-  })
+  const posts = toArray(this._scroller.querySelectorAll('.post'))
+  posts.slice(MAX_MESSAGES).forEach(post => { post.parentNode.removeChild(post) })
 
   // move scrolling position to make it look like nothing happened
   if (oldLatestPost) {
-    var oldLatestPostNewPosition = oldLatestPost.getBoundingClientRect()
-    this._scroller.scrollTop = this._scroller.scrollTop + (Math.round(oldLatestPostNewPosition.top) - Math.round(oldLatestPostOldPosition.top))
+    const oldLatestPostNewPosition = oldLatestPost.getBoundingClientRect()
+    this._scroller.scrollTop = this._scroller.scrollTop
+      + (Math.round(oldLatestPostNewPosition.top)
+      - Math.round(oldLatestPostOldPosition.top))
+
     this._newPostAlert.classList.add('active')
   }
 
@@ -110,7 +112,7 @@ Posts.prototype.addPosts = function(messages) {
 
 // get the date of the latest post, or null if there are no posts
 Posts.prototype.getLatestPostDate = function(messages) {
-  var timeEl = this._container.querySelector('.post-time')
+  const timeEl = this._container.querySelector('.post-time')
   if (!timeEl) return null
   return new Date(timeEl.getAttribute('datetime'))
 }
