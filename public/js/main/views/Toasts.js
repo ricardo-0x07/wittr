@@ -53,6 +53,8 @@ Toast.prototype.hide = function() {
   return this.gone
 }
 
+///
+
 export default function Toasts(elemToAppend: HTMLElement) {
   const container = parseHTML('<div class="toasts"></div>').firstChild
 
@@ -63,17 +65,18 @@ export default function Toasts(elemToAppend: HTMLElement) {
 }
 
 
-type ToastOptions = {
+/**
+ * Returns a `Toast` -a UI component that shows a message to the user.
+ *
+ * @example
+ * toasts.show("Do you wish to continue?", {
+ *  buttons: ['yes', 'no']
+ * })
+ */
+function showToast(message: string, opts: {
   duration: number,
   buttons: string[],
-}
-
-// show a message to the user eg:
-// toasts.show("Do you wish to continue?", {
-//   buttons: ['yes', 'no']
-// })
-// Returns a toast.
-Toasts.prototype.show = function(message: string, opts: ToastOptions) {
+}) {
   opts = defaults({}, opts, {
     duration: 0,
     buttons: ['dismiss']
@@ -93,3 +96,5 @@ Toasts.prototype.show = function(message: string, opts: ToastOptions) {
 
   return toast
 }
+
+Toasts.prototype.show = showToast
