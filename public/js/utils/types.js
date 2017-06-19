@@ -1,7 +1,7 @@
 // @flow
 
 /**
- * Individual message from conf-app backend's WS server.
+ * Individual message from conf-app backend.
  */
 export type Message = {
   avatar: string,

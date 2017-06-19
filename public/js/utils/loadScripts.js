@@ -1,8 +1,8 @@
 // @flow
 
-type t_cb = () => mixed
+type cb = () => mixed
 
-export default function loadScripts(urls: string[], successCallback: t_cb, failureCallback: t_cb) {
+export default function loadScripts(urls: string[], successCallback: cb, failureCallback: cb) {
   let count = urls.length
   let errored = false
 
