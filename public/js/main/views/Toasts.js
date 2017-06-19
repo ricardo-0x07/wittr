@@ -8,6 +8,13 @@ import defaults from 'lodash/object/defaults'
 import transition from 'simple-transition'
 import closest from 'closest'
 
+/**
+ * Toast UI constructor.
+ * @constructor
+ * @param {string} text - Toast message, e.g. "Do you want to continue?"
+ * @param {number} duration - How long should the Toast be visible?
+ * @param {string[]} buttons - Titles of the Toast's buttons.
+ */
 function Toast(text: string, duration: number, buttons: string[]) {
   const toast = this
 
@@ -55,7 +62,7 @@ Toast.prototype.hide = function() {
 
 ///
 
-export default function Toasts(elemToAppend: HTMLElement) {
+function Toasts(elemToAppend: HTMLElement) {
   const container = parseHTML('<div class="toasts"></div>').firstChild
 
   if (!container) throw Error("Something went wrong while creating Toasts container!")
@@ -67,16 +74,12 @@ export default function Toasts(elemToAppend: HTMLElement) {
 
 /**
  * Returns a `Toast` -a UI component that shows a message to the user.
- *
  * @example
  * toasts.show("Do you wish to continue?", {
  *  buttons: ['yes', 'no']
  * })
  */
-function showToast(message: string, opts: {
-  duration: number,
-  buttons: string[],
-}) {
+function showToast(message: string, opts: { duration: number, buttons: string[] }) {
   opts = defaults({}, opts, {
     duration: 0,
     buttons: ['dismiss']
@@ -98,3 +101,5 @@ function showToast(message: string, opts: {
 }
 
 Toasts.prototype.show = showToast
+
+export default Toasts
