@@ -1,21 +1,30 @@
-export default function loadScripts(urls, yeyCallback, neyCallback) {
-  var count = urls.length
-  var errored = false
+// @flow
 
-  if (urls.length == 0) return yeyCallback()
+type t_cb = () => mixed
+
+export default function loadScripts(urls: string[], successCallback: t_cb, failureCallback: t_cb) {
+  let count = urls.length
+  let errored = false
+
+  if (urls.length == 0)
+    return successCallback()
 
   urls.forEach(function(url) {
-    var script = document.createElement('script')
-    script.onload = function() {
+    let scriptEl = document.createElement('script')
+    scriptEl.src = url
+
+    scriptEl.onload = function() {
       if (errored) return
-      if (!--count) yeyCallback()
+      if (!--count) successCallback()
     }
-    script.onerror = function() {
+
+    scriptEl.onerror = function() {
       if (errored) return
-      neyCallback()
+      failureCallback()
       errored = true
     }
-    script.src = url
-    document.head.insertBefore(script, document.head.firstChild)
+
+    // $FlowFixMe
+    document.head.insertBefore(scriptEl, document.head.firstChild)
   })
 }
