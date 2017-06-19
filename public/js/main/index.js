@@ -14,5 +14,8 @@ catch (e) {
 }
 
 loadScripts(polyfillsNeeded, function() {
-  new IndexController(document.querySelector('.main'))
+  const mainContainer = document.querySelector('.main')
+  if (!mainContainer) throw Error("Invalid or empty container element!")
+
+  new IndexController(mainContainer)
 })

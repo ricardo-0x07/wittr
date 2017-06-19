@@ -42,9 +42,9 @@ export default function IndexController(container: HTMLElement) {
   invariant(container, "The `container` provided is not an HTML Element!")
 
   this._container = container
-
   this._postsView = new PostsView(this._container)
   this._toastsView = new ToastsView(this._container)
+
   this._lostConnectionToast = null
   this._dbPromise = openDatabase()
   this._registerServiceWorker()
