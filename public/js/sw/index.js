@@ -7,16 +7,15 @@ const allCaches = [ STATIC_CACHE_NAME, CONTENT_IMG_CACHE ]
 
 self.addEventListener('install', function(event: InstallEvent) {
   event.waitUntil(
-    caches.open(STATIC_CACHE_NAME).then(function(cache) {
-      return cache.addAll([
-        '/skeleton',    // cache app shell
-        '/js/main.js',
-        'css/main.css',
-        'imgs/icon.png',
-        'https://fonts.gstatic.com/s/roboto/v15/2UX7WLTfW3W8TclTUvlFyQ.woff',
-        'https://fonts.gstatic.com/s/roboto/v15/d-6IYplOFocCacKzxwXSOD8E0i7KZn-EPnyo3HZu7kw.woff'
-      ])
-    })
+    caches.open(STATIC_CACHE_NAME)
+      .then(cache => cache.addAll([
+          '/skeleton',    // cache app shell
+          '/js/main.js',
+          'css/main.css',
+          'imgs/icon.png',
+          'https://fonts.gstatic.com/s/roboto/v15/2UX7WLTfW3W8TclTUvlFyQ.woff',
+          'https://fonts.gstatic.com/s/roboto/v15/d-6IYplOFocCacKzxwXSOD8E0i7KZn-EPnyo3HZu7kw.woff'
+        ]))
   )
 })
 
@@ -56,9 +55,8 @@ self.addEventListener('fetch', function(event: FetchEvent) {
   }
 
   event.respondWith(
-    caches.match(event.request).then(function(response) {
-      return response || fetch(event.request)
-    })
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
   )
 })
 
